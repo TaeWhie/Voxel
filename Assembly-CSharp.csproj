@@ -66,6 +66,7 @@
   <ItemGroup>
     <Compile Include="Assets\Script\Chunk.cs" />
     <Compile Include="Assets\Script\VoxelData.cs" />
+    <Compile Include="Assets\Script\World.cs" />
     <Reference Include="Unity.Timeline.Editor">
       <HintPath>D:/Unity/Voxel/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
     </Reference>

@@ -8,6 +8,14 @@ public static class VoxelData//복셀에 들어갈 하나의 큐브를 설정하
 	public static readonly int ChunkWidth = 5;
 	public static readonly int ChunkHeight = 15;
 
+	public static readonly int TextureAtlasSizeInBlocks = 4;//가지고 있는 텍스쳐의 사이즈는 4x4짜리이기 때문에 값은 4로 지정한다.
+	public static float NormalizedBlockTextureSize//한 블럭의 사이즈를 알려준다.
+	{
+
+		get { return 1f / (float)TextureAtlasSizeInBlocks; }//여기서는 텍스쳐를 1/4로 나누면 하나의 블럭 사이즈가 나온다.
+
+	}
+
 	public static readonly Vector3[] voxelVerts = new Vector3[8] {//정육면체의 각각 정점의 위치
 
 		new Vector3(0.0f, 0.0f, 0.0f),
