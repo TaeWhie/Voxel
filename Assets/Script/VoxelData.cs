@@ -7,7 +7,14 @@ public static class VoxelData//복셀에 들어갈 하나의 큐브를 설정하
 	//덩어리의 크기를 지정해 준다.
 	public static readonly int ChunkWidth = 5;
 	public static readonly int ChunkHeight = 15;
+	public static readonly int WorldSizeInChunks = 50;//월드의 최대 사이즈
+	public static readonly int ViewDistanceInChunks = 8;//비춰줄 청크의 개수
+	public static int WorldSizeInBlocks
+	{
 
+		get { return WorldSizeInChunks * ChunkWidth; }
+
+	}
 	public static readonly int TextureAtlasSizeInBlocks = 4;//가지고 있는 텍스쳐의 사이즈는 4x4짜리이기 때문에 값은 4로 지정한다.
 	public static float NormalizedBlockTextureSize//한 블럭의 사이즈를 알려준다.
 	{

@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Chunk : MonoBehaviour
+public class Chunk//직접적으로 엔진을 돌리지 않기 때문에 MonoBehaviour삭제
 {
+	public ChunkCoord coord;//청크가 들어가야할 좌표
 
 	public MeshRenderer meshRenderer;
 	public MeshFilter meshFilter;
+	GameObject chunkObject;
 
 	int vertexIndex = 0;
 	List<Vector3> vertices = new List<Vector3>();
@@ -16,15 +18,29 @@ public class Chunk : MonoBehaviour
 	byte[,,] voxelMap = new byte[VoxelData.ChunkWidth, VoxelData.ChunkHeight, VoxelData.ChunkWidth];//복셀 맵 배열의 크기
 
 	private World world;
-	void Start()
-	{
-		world = GameObject.Find("World").GetComponent<World>();//씬에 존재하는 월드 정보를 불러온다.
 
-		PopulateVoxelMap();//voxelmap을 true 설정
-		CreateMeshData();//false면 그리고 true면 그리지 않는다.
-		CreateMesh();//렌더링한다.
+	public Chunk(ChunkCoord _coord, World _world)//좌표와 월드를 받아 그리는 함수
+	{
+		coord = _coord;
+		chunkObject = new GameObject();
+		chunkObject.transform.position = new Vector3(coord.x * VoxelData.ChunkWidth, 0f, coord.z * VoxelData.ChunkWidth);
+
+		meshRenderer = chunkObject.AddComponent<MeshRenderer>();
+		meshFilter = chunkObject.AddComponent<MeshFilter>();
+		world = _world;
+
+		chunkObject.transform.SetParent(world.transform);
+		meshRenderer.material = world.material;
+
+		chunkObject.name = coord.x + ", " + coord.z;
+
+		PopulateVoxelMap();
+		CreateMeshData();
+		CreateMesh();
+
 	}
-	void PopulateVoxelMap()//Voxelmap의 기본 값을 true로 설정 하는 과정, 이 과정을 거치지 않으면 값은 false이다.
+	
+	void PopulateVoxelMap()//어떤 위치에 어떤 모양의 복셀이 들어가는지 설정하는 함수
 	{
 
 		for (int y = 0; y < VoxelData.ChunkHeight; y++)
@@ -33,19 +49,33 @@ public class Chunk : MonoBehaviour
 			{
 				for (int z = 0; z < VoxelData.ChunkWidth; z++)
 				{
-					//if(x >= y && z >= y) //이런 조건을 추가하면 계단모양의 Chunk를 만들수 있다.
-					//voxelMap[x, y, z] = true;
-
-					//높이에 따라 다른 다른 블록을 쓴다. 숫자는 World의 Blocktype의 배열 변호이다.
-					if (y < 1)
-						voxelMap[x, y, z] = 0;
-					else if (y == VoxelData.ChunkHeight - 1)
-						voxelMap[x, y, z] = 1;
-					else
-						voxelMap[x, y, z] = 2;
+					voxelMap[x, y, z] = world.GetVoxel(new Vector3(x, y, z) + position);
 				}
 			}
 		}
+
+	}
+	public bool isActive
+	{
+
+		get { return chunkObject.activeSelf; }
+		set { chunkObject.SetActive(value); }
+
+	}
+
+	Vector3 position
+	{
+
+		get { return chunkObject.transform.position; }
+
+	}
+
+	bool IsVoxelInChunk(int x, int y, int z)
+	{
+
+		if (x < 0 || x > VoxelData.ChunkWidth - 1 || y < 0 || y > VoxelData.ChunkHeight - 1 || z < 0 || z > VoxelData.ChunkWidth - 1)
+			return false;
+		else return true;
 
 	}
 
@@ -66,7 +96,14 @@ public class Chunk : MonoBehaviour
 		}
 
 	}
+	public byte GetVoxelFromMap(Vector3 pos)
+	{
 
+		pos -= position;
+
+		return voxelMap[(int)pos.x, (int)pos.y, (int)pos.z];
+
+	}
 	bool CheckVoxel(Vector3 pos)
 	{
 
@@ -74,8 +111,9 @@ public class Chunk : MonoBehaviour
 		int y = Mathf.FloorToInt(pos.y);
 		int z = Mathf.FloorToInt(pos.z);
 		// 맵 범위를 벗어나는 경우
-		if (x < 0 || x > VoxelData.ChunkWidth - 1 || y < 0 || y > VoxelData.ChunkHeight - 1 || z < 0 || z > VoxelData.ChunkWidth - 1)
-			return false;
+		if (!IsVoxelInChunk(x, y, z))
+			return world.blocktypes[world.GetVoxel(pos + position)].isSolid;
+
 		return /*voxelMap[x, y, z]; ->*/world.blocktypes[voxelMap[x, y, z]].isSolid;
 
 	}
@@ -83,7 +121,8 @@ public class Chunk : MonoBehaviour
 	void AddVoxelDataToChunk(Vector3 pos)
 	{
 		for (int p = 0; p < 6; p++)//VoxelData에 설정해 놓은 값을 통해 값을 집어넣음
-		{    //각 면을 그리는 과정이다. 정육면체임으로 6번을 순환한다.
+		{    
+			//각 면을 그리는 과정이다. 정육면체임으로 6번을 순환한다.
 
 			// Face Check(면이 바라보는 방향으로 +1 이동하여 확인)를 했을 때 
 			// Solid가 아닌 경우에만 큐브의 면이 그려지도록 하기
@@ -98,7 +137,6 @@ public class Chunk : MonoBehaviour
 				for (int i = 0; i <= 3; i++)
 				{
 					vertices.Add(VoxelData.voxelVerts[VoxelData.voxelTris[p, i]] + pos);
-					//uvs.Add(VoxelData.voxelUvs[i]);
 				}
 				AddTexture(world.blocktypes[blockID].GetTextureID(p));
 				
