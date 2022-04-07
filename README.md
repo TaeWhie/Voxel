@@ -13,4 +13,5 @@ Texture
 Chunks  
 ![ezgif com-gif-maker](https://user-images.githubusercontent.com/101923824/161376319-0ee9efee-262e-4e69-973b-370f7901da2c.gif)  
 22-04-07  
+Height Map  
 ![Map](https://user-images.githubusercontent.com/101923824/162177901-5ce28a63-85eb-4c73-9faf-67a302a24d53.png)
