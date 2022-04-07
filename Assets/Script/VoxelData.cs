@@ -5,11 +5,11 @@ using UnityEngine;
 public static class VoxelData//복셀에 들어갈 하나의 큐브를 설정하는 작업
 {
 	//덩어리의 크기를 지정해 준다.
-	public static readonly int ChunkWidth = 5;
-	public static readonly int ChunkHeight = 15;
-	public static readonly int WorldSizeInChunks = 50;//월드의 최대 사이즈
-	public static readonly int ViewDistanceInChunks = 8;//비춰줄 청크의 개수
-	public static int WorldSizeInBlocks
+	public static readonly int ChunkWidth = 16;
+	public static readonly int ChunkHeight = 128;
+	public static readonly int WorldSizeInChunks = 10;//월드의 최대 사이즈
+	public static readonly int ViewDistanceInChunks = 10;//비춰줄 청크의 개수
+	public static int WorldSizeInVoxels
 	{
 
 		get { return WorldSizeInChunks * ChunkWidth; }

@@ -64,7 +64,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Script\BiomeAttributes.cs" />
     <Compile Include="Assets\Script\Chunk.cs" />
+    <Compile Include="Assets\Script\Noise.cs" />
     <Compile Include="Assets\Script\VoxelData.cs" />
     <Compile Include="Assets\Script\World.cs" />
     <Reference Include="Unity.Timeline.Editor">

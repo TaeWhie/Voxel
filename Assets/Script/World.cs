@@ -4,23 +4,34 @@ using UnityEngine;
 
 public class World : MonoBehaviour//월드를 형성 하기 위한 정보를 위한 클래스이다.
 {
+    public int seed;
+    public BiomeAttributes biome;
+
     public Transform player;//플레이어 위치
-    public Vector3 spawn;//스폰 위치
+    public Vector3 spawnPosition;//스폰 위치
 
     public Material material;
     public BlockType[] blocktypes;
 
     Chunk[,] chunks = new Chunk[VoxelData.WorldSizeInChunks, VoxelData.WorldSizeInChunks];
+
     List<ChunkCoord> activeChunks = new List<ChunkCoord>();
+    ChunkCoord playerChunkCoord;
     ChunkCoord playerLastChunkCoord;
+
 
     private void Start()
     {
+        Random.InitState(seed);
+
+        spawnPosition = new Vector3((VoxelData.WorldSizeInChunks * VoxelData.ChunkWidth) / 2f, VoxelData.ChunkHeight + 2f, (VoxelData.WorldSizeInChunks * VoxelData.ChunkWidth) / 2f);
         GenerateWorld();
-        playerLastChunkCoord = GetChunkCoordFromVector3(player.transform.position);
+        playerLastChunkCoord = GetChunkCoordFromVector3(player.position);
     }
     private void Update()
     {
+
+        playerChunkCoord = GetChunkCoordFromVector3(player.position);
 
         if (!GetChunkCoordFromVector3(player.transform.position).Equals(playerLastChunkCoord))
             CheckViewDistance();
@@ -44,13 +55,12 @@ public class World : MonoBehaviour//월드를 형성 하기 위한 정보를 위
             for (int z = VoxelData.WorldSizeInChunks / 2 - VoxelData.ViewDistanceInChunks / 2; z < VoxelData.WorldSizeInChunks / 2 + VoxelData.ViewDistanceInChunks / 2; z++)
             {
 
-                CreateChunk(new ChunkCoord(x, z));
+                CreateNewChunk(x, z);
 
             }
         }
 
-        spawn = new Vector3(VoxelData.WorldSizeInBlocks / 2, VoxelData.ChunkHeight + 2, VoxelData.WorldSizeInBlocks / 2);
-        player.position = spawn;
+        player.position = spawnPosition;
 
     }
 
@@ -74,7 +84,7 @@ public class World : MonoBehaviour//월드를 형성 하기 위한 정보를 위
                     ChunkCoord thisChunk = new ChunkCoord(x, z);
 
                     if (chunks[x, z] == null)//만약 생성되어 있지않다면 생성한다.
-                        CreateChunk(thisChunk);
+                        CreateNewChunk(x, z);
                     else if (!chunks[x, z].isActive)//엑티브만 꺼져있다면 켜주고, 엑티브되었으니 리스트에 추가해준다.
                     {
                         chunks[x, z].isActive = true;
@@ -109,57 +119,72 @@ public class World : MonoBehaviour//월드를 형성 하기 위한 정보를 위
 
     }
 
-    private void CreateChunk(ChunkCoord coord)
+    void CreateNewChunk(int x, int z)
     {
-        //x와z만 고려하기 때문에 y인 높이는 그려지지 않는다.
-        chunks[coord.x, coord.z] = new Chunk(new ChunkCoord(coord.x, coord.z), this);
-        activeChunks.Add(new ChunkCoord(coord.x, coord.z));
 
+        chunks[x, z] = new Chunk(new ChunkCoord(x, z), this);
+        activeChunks.Add(new ChunkCoord(x, z));
 
     }
+
 
     public byte GetVoxel(Vector3 pos)
     {
+        int yPos = Mathf.FloorToInt(pos.y);
 
-        if (pos.x < 0 || pos.x > VoxelData.WorldSizeInBlocks - 1 || pos.y < 0 || pos.y > VoxelData.ChunkHeight - 1 || pos.z < 0 || pos.z > VoxelData.WorldSizeInBlocks - 1)
+        /* IMMUTABLE PASS */
+
+        // If outside world, return air.
+        if (!IsVoxelInWorld(pos))
             return 0;
-        if (pos.y < 1)
+
+        // If bottom block of chunk, return bedrock.
+        if (yPos == 0)
             return 1;
-        else if (pos.y == VoxelData.ChunkHeight - 1)
-            return 3;
+
+        /* BASIC TERRAIN PASS */
+
+        int terrainHeight = Mathf.FloorToInt(biome.terrainHeight * Noise.Get2DPerlin(new Vector2(pos.x, pos.z), 0, biome.terrainScale)) + biome.solidGroundHeight;
+        byte voxelValue = 0;
+
+        if (yPos == terrainHeight)
+            voxelValue = 3;
+        else if (yPos < terrainHeight && yPos > terrainHeight - 4)
+            voxelValue = 5;
+        else if (yPos > terrainHeight)
+            return 0;
         else
-            return 2;
+            voxelValue = 2;
+
+        /* SECOND PASS */
+        //사이 사이에 다른 광석을 만들기 위한 부분
+        if (voxelValue == 2)
+        {
+
+            foreach (Lode lode in biome.lodes)//biome에 있는 lode의 수만큼 반복한다.
+            {
+
+                if (yPos > lode.minHeight && yPos < lode.maxHeight)
+                    if (Noise.Get3DPerlin(pos, lode.noiseOffset, lode.scale, lode.threshold))
+                        voxelValue = lode.blockID;
+
+            }
+
+        }
+
+        return voxelValue;
+
 
     }
-
-}
-
-public class ChunkCoord
-{
-
-    public int x;
-    public int z;
-
-    public ChunkCoord(int _x, int _z)
+    bool IsVoxelInWorld(Vector3 pos)
     {
 
-        x = _x;
-        z = _z;
-
-    }
-
-    public bool Equals(ChunkCoord other)
-    {
-
-        if (other == null)
-            return false;
-        else if (other.x == x && other.z == z)
+        if (pos.x >= 0 && pos.x < VoxelData.WorldSizeInVoxels && pos.y >= 0 && pos.y < VoxelData.ChunkHeight && pos.z >= 0 && pos.z < VoxelData.WorldSizeInVoxels)
             return true;
         else
             return false;
 
     }
-
 }
 
 [System.Serializable]

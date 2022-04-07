@@ -149,8 +149,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cf23674a1fb8c814eb74a34bdc4721b3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  seed: 2
+  biome: {fileID: 11400000, guid: 1ada4e2938e5c804f8090a2fd82698c2, type: 2}
   player: {fileID: 963194228}
-  spawn: {x: 0, y: 0, z: 0}
+  spawnPosition: {x: 0, y: 0, z: 0}
   material: {fileID: 2100000, guid: 22ec22ad25df30640a66ed1efd5f719d, type: 2}
   blocktypes:
   - blockName: ad
@@ -185,6 +187,22 @@ MonoBehaviour:
     bottomFaceTexture: 1
     leftFaceTexture: 2
     rightFaceTexture: 2
+  - blockName: Sand
+    isSolid: 1
+    backFaceTexture: 10
+    frontFaceTexture: 10
+    topFaceTexture: 10
+    bottomFaceTexture: 10
+    leftFaceTexture: 10
+    rightFaceTexture: 10
+  - blockName: dirt
+    isSolid: 1
+    backFaceTexture: 1
+    frontFaceTexture: 1
+    topFaceTexture: 1
+    bottomFaceTexture: 1
+    leftFaceTexture: 1
+    rightFaceTexture: 1
 --- !u!4 &97616906
 Transform:
   m_ObjectHideFlags: 0
@@ -366,10 +384,10 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}

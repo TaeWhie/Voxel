@@ -39,17 +39,16 @@ public class Chunk//직접적으로 엔진을 돌리지 않기 때문에 MonoBeh
 		CreateMesh();
 
 	}
-	
+
 	void PopulateVoxelMap()//어떤 위치에 어떤 모양의 복셀이 들어가는지 설정하는 함수
 	{
 
-		for (int y = 0; y < VoxelData.ChunkHeight; y++)
-		{
-			for (int x = 0; x < VoxelData.ChunkWidth; x++)
-			{
-				for (int z = 0; z < VoxelData.ChunkWidth; z++)
-				{
-					voxelMap[x, y, z] = world.GetVoxel(new Vector3(x, y, z) + position);
+	for (int y = 0; y < VoxelData.ChunkHeight; y++) {
+			for (int x = 0; x < VoxelData.ChunkWidth; x++) {
+				for (int z = 0; z < VoxelData.ChunkWidth; z++) {
+
+                    voxelMap[x, y, z] = world.GetVoxel(new Vector3(x, y, z) + position);
+    
 				}
 			}
 		}
@@ -89,7 +88,8 @@ public class Chunk//직접적으로 엔진을 돌리지 않기 때문에 MonoBeh
 				for (int z = 0; z < VoxelData.ChunkWidth; z++)
 				{
 
-					AddVoxelDataToChunk(new Vector3(x, y, z));
+					if (world.blocktypes[voxelMap[x, y, z]].isSolid)
+						AddVoxelDataToChunk(new Vector3(x, y, z));
 
 				}
 			}
@@ -121,7 +121,7 @@ public class Chunk//직접적으로 엔진을 돌리지 않기 때문에 MonoBeh
 	void AddVoxelDataToChunk(Vector3 pos)
 	{
 		for (int p = 0; p < 6; p++)//VoxelData에 설정해 놓은 값을 통해 값을 집어넣음
-		{    
+		{
 			//각 면을 그리는 과정이다. 정육면체임으로 6번을 순환한다.
 
 			// Face Check(면이 바라보는 방향으로 +1 이동하여 확인)를 했을 때 
@@ -139,7 +139,7 @@ public class Chunk//직접적으로 엔진을 돌리지 않기 때문에 MonoBeh
 					vertices.Add(VoxelData.voxelVerts[VoxelData.voxelTris[p, i]] + pos);
 				}
 				AddTexture(world.blocktypes[blockID].GetTextureID(p));
-				
+
 				// 2. Triangle의 버텍스 인덱스 6개 추가
 				triangles.Add(vertexIndex);
 				triangles.Add(vertexIndex + 1);
@@ -195,6 +195,33 @@ public class Chunk//직접적으로 엔진을 돌리지 않기 때문에 MonoBeh
 		uvs.Add(new Vector2(x + VoxelData.NormalizedBlockTextureSize, y));
 		uvs.Add(new Vector2(x + VoxelData.NormalizedBlockTextureSize, y + VoxelData.NormalizedBlockTextureSize));
 
+
+	}
+
+}
+public class ChunkCoord
+{
+
+	public int x;
+	public int z;
+
+	public ChunkCoord(int _x, int _z)
+	{
+
+		x = _x;
+		z = _z;
+
+	}
+
+	public bool Equals(ChunkCoord other)
+	{
+
+		if (other == null)
+			return false;
+		else if (other.x == x && other.z == z)
+			return true;
+		else
+			return false;
 
 	}
 }
